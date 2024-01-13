@@ -2,6 +2,7 @@ from datetime import datetime
 from airflow import Dataset
 from airflow.models import DAG
 from pandas import DataFrame
+import pandas as pd
 
 # Import decorators and classes from the SDK
 from astro import sql as aql
@@ -11,14 +12,11 @@ from astro.sql.table import Table
 # Import SQLAlchemy to set constraints on some temporary tables
 import sqlalchemy
 
-# Define constants for interacting with external systems
+# Define constants/variables for interacting with external systems
 S3_FILE_PATH = "https://merkle-de-interview-case-study.s3.eu-central-1.amazonaws.com/de/item.csv"
 S3_CONN_ID = "aws_default"
 SNOWFLAKE_CONN_ID = "snowflake_default"
-SNOWFLAKE_ITEM = "item"
-# SNOWFLAKE_CUSTOMERS = "customers_table"
-# SNOWFLAKE_REPORTING = "reporting_table"
-
+SNOWFLAKE_ITEM = "d_item"
 my_dataset = Dataset("https://merkle-de-interview-case-study.s3.eu-central-1.amazonaws.com/de/item.csv")
 
 
@@ -26,7 +24,7 @@ my_dataset = Dataset("https://merkle-de-interview-case-study.s3.eu-central-1.ama
 # This function filters out all rows with an amount value less than 150.
 @aql.transform
 def get_item_table(input_table: Table):
-    return "SELECT * FROM {{input_table}} WHERE CATEGORY = 'instrument'"
+    return "SELECT * FROM {{input_table}} "
 
 
 # Define an SQL query for our transform step as a Python function using the SDK.
@@ -38,9 +36,12 @@ def get_item_table(input_table: Table):
 #     ON f.customer_id = c.customer_id"""
 
 
-# Define a function for transforming tables to dataframes
+# Define a function for transforming tables to dataframes and rename columns
 @aql.dataframe
 def transform_dataframe(df: DataFrame):
+    df = df.rename(columns={"adjective": "item_adjective", "category": "item_category", 
+    "created_at": "item_created_at","id" : "item_id", "modifier" : "item_modifier", "name" : 
+    "item_name", "price" : "item_price"})
     # purchase_dates = df.loc[:, "purchase_date"]
     # print("purchase dates:", purchase_dates)
     return df
@@ -105,9 +106,15 @@ with dag:
     #     conn_id=SNOWFLAKE_CONN_ID,
     # )
 
-    item_data = get_item_table(items_data,output_table = Table(
-        name="Item_fil",
-        conn_id=SNOWFLAKE_CONN_ID,
+#Chunk working one
+    # item_data = get_item_table(items_data,output_table = Table(
+    #     name="Item",
+    #     conn_id=SNOWFLAKE_CONN_ID,
+    # ))
+
+    item_data = transform_dataframe(get_item_table(items_data),output_table = Table(
+    name="Item",
+    conn_id=SNOWFLAKE_CONN_ID,
     ))
 
     # item_data = transform_dataframe(get_item_table(items_data))
