@@ -3,6 +3,7 @@ from airflow import Dataset
 from airflow.models import DAG
 from pandas import DataFrame
 import pandas as pd
+import config
 
 # Import decorators and classes from the SDK
 from astro import sql as aql
@@ -14,27 +15,14 @@ import sqlalchemy
 
 # Define constants/variables for interacting with external systems
 S3_FILE_PATH = "https://merkle-de-interview-case-study.s3.eu-central-1.amazonaws.com/de/item.csv"
-S3_CONN_ID = "aws_default"
 SNOWFLAKE_CONN_ID = "snowflake_default"
-SNOWFLAKE_ITEM = "d_item"
-my_dataset = Dataset("https://merkle-de-interview-case-study.s3.eu-central-1.amazonaws.com/de/item.csv")
 
 
 # Define an SQL query for our transform step as a Python function using the SDK.
-# This function filters out all rows with an amount value less than 150.
+# This function converts input file to a SQL table.
 @aql.transform
 def get_item_table(input_table: Table):
     return "SELECT * FROM {{input_table}} "
-
-
-# Define an SQL query for our transform step as a Python function using the SDK.
-# This function joins two tables into a new table.
-# @aql.transform
-# def join_orders_customers(filtered_orders_table: Table, customers_table: Table):
-#     return """SELECT c.customer_id, customer_name, order_id, purchase_date, amount, type
-#     FROM {{filtered_orders_table}} f JOIN {{customers_table}} c
-#     ON f.customer_id = c.customer_id"""
-
 
 # Define a function for transforming tables to dataframes and rename columns
 @aql.dataframe
@@ -46,8 +34,7 @@ def transform_dataframe(df: DataFrame):
     # print("purchase dates:", purchase_dates)
     return df
 
-
-# Basic DAG definition. Run the DAG starting January 1st, 2019 on a daily schedule.
+# Basic DAG definition
 dag = DAG(
     dag_id="items_table_create",
     start_date=datetime(2024, 1, 12),
@@ -57,18 +44,13 @@ dag = DAG(
 
 with dag:
     # Load a file with a header from S3 into a temporary Table, referenced by the
-    # variable `orders_data`. This simulated the `extract` step of the ETL pipeline.
+    # variable `items_data`. This simulated the `extract` step of the ETL pipeline.
     items_data = aql.load_file(
         # Data file needs to have a header row. The input and output table can be replaced with any
         # valid file and connection ID.
-        # input_file = my_dataset,
         input_file=File(S3_FILE_PATH
-            # path=S3_FILE_PATH + "/item.csv", conn_id=S3_CONN_ID
-            # path=S3_FILE_PATH + "/item.csv"
-            # my_dataset
         ),
         output_table=Table(
-            # name=SNOWFLAKE_ITEM,
             conn_id=SNOWFLAKE_CONN_ID,
             # apply constraints to the columns of the temporary output table,
             # which is a requirement for running the '.merge' function later in the DAG.
@@ -100,46 +82,22 @@ with dag:
         ),
     )
 
-    # Create a Table object for item data in the Snowflake database
-    # output_table = Table(
-    #     name="Item_fil",
-    #     conn_id=SNOWFLAKE_CONN_ID,
-    # )
 
-#Chunk working one
-    # item_data = get_item_table(items_data,output_table = Table(
-    #     name="Item",
-    #     conn_id=SNOWFLAKE_CONN_ID,
-    # ))
-
+# d_item_table dataframe and merge it into one on already snowflake
     item_data = transform_dataframe(get_item_table(items_data),output_table = Table(
-    name="Item",
-    conn_id=SNOWFLAKE_CONN_ID,
+        conn_id=SNOWFLAKE_CONN_ID,
     ))
 
-    # item_data = transform_dataframe(get_item_table(items_data))
-
-    # Filter the orders data and then join with the customer table,
-    # saving the output into a temporary table referenced by the Table instance `joined_data`
-    # joined_data = join_orders_customers(filter_orders(orders_data), customers_table)
-
-    # Merge the joined data into the reporting table based on the order_id.
-    # If there's a conflict in the customer_id or customer_name, then use the ones from
-    # the joined data
-    # reporting_table = aql.merge(
-    #     target_table=Table(
-    #         name=SNOWFLAKE_REPORTING,
-    #         conn_id=SNOWFLAKE_CONN_ID,
-    #     ),
-    #     source_table=joined_data,
-    #     target_conflict_columns=["order_id"],
-    #     columns=["customer_id", "customer_name"],
-    #     if_conflicts="update",
-    # )
-
-    # Transform the reporting table into a dataframe
-    # purchase_dates = transform_dataframe(reporting_table)
+    item_data_merge = aql.merge(target_table=Table(
+        name="d_item",
+        conn_id=SNOWFLAKE_CONN_ID,),
+        source_table = item_data,
+        target_conflict_columns=["item_id"],
+        columns=["item_adjective","item_category","item_created_at","item_modifier","item_id"
+                 ,"item_name","item_price"],
+        if_conflicts="update",
+    )
 
     # Delete temporary and unnamed tables created by `load_file` and `transform`, in this example
-    # both `orders_data` and `joined_data`
+    # item_data
     aql.cleanup()
