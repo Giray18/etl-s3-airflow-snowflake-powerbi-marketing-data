@@ -30,8 +30,7 @@ def transform_dataframe(df: DataFrame):
     df = df.rename(columns={"adjective": "item_adjective", "category": "item_category", 
     "created_at": "item_created_at","id" : "item_id", "modifier" : "item_modifier", "name" : 
     "item_name", "price" : "item_price"})
-    # purchase_dates = df.loc[:, "purchase_date"]
-    # print("purchase dates:", purchase_dates)
+    # df = df.rename(config.columns)
     return df
 
 # Basic DAG definition
@@ -87,6 +86,7 @@ with dag:
     item_data = transform_dataframe(get_item_table(items_data),output_table = Table(
         conn_id=SNOWFLAKE_CONN_ID,
     ))
+
 
     item_data_merge = aql.merge(target_table=Table(
         name="d_item",
