@@ -1,0 +1,8 @@
+build-essential
+freetds-dev
+libkrb5-dev
+default-libmysqlclient-dev
+gcc
+g++
+unixodbc
+unixodbc-dev

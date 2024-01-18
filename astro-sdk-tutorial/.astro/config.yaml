@@ -1,2 +1,4 @@
 project:
   name: astro-sdk-tutorial
+
+allowed_deserialization_classes : airflow\.* astro\.*
