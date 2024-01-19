@@ -2,3 +2,9 @@ project:
   name: astro-sdk-tutorial
 
 allowed_deserialization_classes : airflow\.* astro\.*
+
+AIRFLOW__ASTRO_SDK__STORE_DATA_LOCAL_DEV : true
+
+# AIRFLOW__ASTRO_SDK__XCOM_STORAGE_CONN_ID : SNOWFLAKE_CONN_ID
+
+AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES : airflow\.* astro\.*

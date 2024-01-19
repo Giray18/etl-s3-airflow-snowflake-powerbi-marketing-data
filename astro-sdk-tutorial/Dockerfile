@@ -6,6 +6,8 @@ RUN pip install apache-airflow-providers-common-sql
 
 RUN pip install apache-airflow-providers-odbc
 
+RUN pip install snowflake-sqlalchemy-json
+
 # RUN apt-get update
 # RUN apt-get install unixodbc-dev
 # RUN pip install pyodbc

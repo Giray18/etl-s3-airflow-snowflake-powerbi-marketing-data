@@ -35,7 +35,7 @@ def transform_dataframe(df: DataFrame):
 
 # Basic DAG definition
 dag = DAG(
-    dag_id="items_table_create",
+    dag_id="d_items_table_create",
     start_date=datetime(2024, 1, 12),
     schedule="@daily",
     catchup=False,
@@ -82,7 +82,8 @@ with dag:
     )
 
 
-# d_item_table dataframe and merge it into one on already snowflake
+# d_item_table dataframe and merge it into one on already snowflake by this step 
+# we may be able to update fields if item related fields updated and keep fresh our item table
     item_data = transform_dataframe(get_item_table(items_data),output_table = Table(
         conn_id=SNOWFLAKE_CONN_ID,
     ))
@@ -98,6 +99,6 @@ with dag:
         if_conflicts="update",
     )
 
-    # Delete temporary and unnamed tables created by `load_file` and `transform`, in this example
-    # item_data
+# Delete temporary and unnamed tables created by `load_file` and `transform`, in this example
+# item_data
     aql.cleanup()

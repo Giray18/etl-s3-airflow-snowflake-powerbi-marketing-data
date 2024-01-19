@@ -114,15 +114,15 @@ def extract():
 # except Exception as e:
 #     print("Error while extracting data: " + str(e))
         
-dag = DAG(
-    dag_id="d_user_id_sql_server",
-    start_date=datetime(2024, 1, 12),
-    schedule="@daily",
-    catchup=False,
-)
+# dag = DAG(
+#     dag_id="d_user_id_sql_server",
+#     start_date=datetime(2024, 1, 12),
+#     schedule="@daily",
+#     catchup=False,
+# )
 
-with dag:
-    extract()
+# with dag:
+#     extract()
     # Load a file with a header from S3 into a temporary Table, referenced by the
     # variable `items_data`. This simulated the `extract` step of the ETL pipeline.
 #     event_data = aql.load_file(

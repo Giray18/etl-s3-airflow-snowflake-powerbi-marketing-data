@@ -6,12 +6,6 @@ from pandas import DataFrame
 import pandas as pd
 import config
 
-#sqlalchemy-Snowflake JSON handling packages
-import snowflake_sqlalchemy_json
-from sqlalchemy import Column, Integer, JSON, String, func, select
-from sqlalchemy.orm import declarative_base, DeclarativeMeta
-from sqlalchemy.sql import quoted_name
-
 # Import decorators and classes from the SDK
 from astro import sql as aql
 from astro.files import File
@@ -35,19 +29,19 @@ def get_item_table(input_table: Table):
 @aql.dataframe
 def transform_dataframe(df: DataFrame):
     # Renaming columns as per needed column naming conventions
-    df = df.rename(columns={"user_id": "event_user_id"})
+    df = df.rename(columns={"event_id": "event_event_id"})
     # df = df.rename(config.columns)
     # Droping duplicates on USER_ID column to get unique user id holding column
-    df = df.drop_duplicates(subset=['event_user_id'])
+    df = df.drop_duplicates(subset=['event_event_id'])
     # Filtering only needed columns
-    df =  df[['event_user_id']]
+    df =  df[['event_event_id']]
     # Index column implementation
     df = df.assign(row_number=range(1,len(df)+1))
     return df
 
 # Basic DAG definition
 dag = DAG(
-    dag_id="d_user_id_table_create",
+    dag_id="d_event_id_table_create",
     start_date=datetime(2024, 1, 12),
     schedule="@daily",
     catchup=False,
@@ -59,7 +53,6 @@ with dag:
     event_data = aql.load_file(task_id="load_events",input_file=File(url),
     # EVENT_RAW Table being created on Snowflake as a RAW ingested no relation with further transformations
     output_table=Table(
-        # name="EVENT_RAW",
         conn_id=SNOWFLAKE_CONN_ID,
             # apply constraints to the columns of the temporary output table,
             # which is a requirement for running the '.merge' function later in the DAG.
@@ -87,7 +80,7 @@ with dag:
 
 # d_user table saved into snowflake
     events_data = transform_dataframe(get_item_table(event_data),output_table = Table(
-        name="d_user",
+        name="d_event",
         conn_id=SNOWFLAKE_CONN_ID,
     ))
 
