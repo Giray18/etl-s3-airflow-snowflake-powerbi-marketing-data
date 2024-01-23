@@ -1,9 +1,11 @@
 from datetime import datetime
 from airflow import Dataset
 from airflow.models import DAG
+from airflow.providers.snowflake.operators.snowflake import SnowflakeOperator
 from pandas import DataFrame
 import pandas as pd
 import config
+import json
 
 # Import decorators and classes from the SDK
 from astro import sql as aql
@@ -14,15 +16,9 @@ from astro.sql.table import Table
 import sqlalchemy
 
 # Define constants/variables for interacting with external systems
-S3_FILE_PATH = "https://merkle-de-interview-case-study.s3.eu-central-1.amazonaws.com/de/item.csv"
 SNOWFLAKE_CONN_ID = "snowflake_default"
+S3_FILE_PATH = "https://merkle-de-interview-case-study.s3.eu-central-1.amazonaws.com/de/item.csv"
 
-
-# Define an SQL query for our transform step as a Python function using the SDK.
-# This function converts input file to a SQL table.
-@aql.transform
-def get_item_table(input_table: Table):
-    return "SELECT * FROM {{input_table}} "
 
 # Define a function for transforming tables to dataframes and rename columns
 @aql.dataframe
@@ -42,55 +38,21 @@ dag = DAG(
 )
 
 with dag:
-    # Load a file with a header from S3 into a temporary Table, referenced by the
-    # variable `items_data`. This simulated the `extract` step of the ETL pipeline.
-    items_data = aql.load_file(
-        # Data file needs to have a header row. The input and output table can be replaced with any
-        # valid file and connection ID.
-        input_file=File(S3_FILE_PATH
-        ),
-        output_table=Table(
-            conn_id=SNOWFLAKE_CONN_ID,
-            # apply constraints to the columns of the temporary output table,
-            # which is a requirement for running the '.merge' function later in the DAG.
-            columns=[
-                sqlalchemy.Column("adjective", sqlalchemy.String(60), primary_key=False, nullable=True),
-                sqlalchemy.Column(
-                    "category",
-                    sqlalchemy.String(60),
-                    nullable=False,
-                ),
-                sqlalchemy.Column(
-                    "created_at",
-                    sqlalchemy.String(60),
-                    nullable=False,
-                ),
-                sqlalchemy.Column(
-                    "id", sqlalchemy.Integer, nullable=False, key="id", primary_key=True
-                ),
-                sqlalchemy.Column(
-                    "modifier", sqlalchemy.String(60), nullable=True,
-                ),
-                sqlalchemy.Column(
-                    "name", sqlalchemy.String(60), nullable=False,
-                ),
-                sqlalchemy.Column(
-                    "price", sqlalchemy.String(60), nullable=False,
-                ),
-            ],
-        ),
-    )
+    # Load a file with a header from s3 buckey into Snowflake, referenced by the
+    # variable `event_data`. This simulated the `extract` step of the ETL pipeline.
+    items_data = aql.load_file(task_id="load_items",input_file=File(S3_FILE_PATH),)
 
 
-# d_item_table dataframe and merge it into one on already snowflake by this step 
-# we may be able to update fields if item related fields updated and keep fresh our item table
-    item_data = transform_dataframe(get_item_table(items_data),output_table = Table(
-        conn_id=SNOWFLAKE_CONN_ID,
+# d_item table created and merged into snowflake table as delta loads arrive
+    item_data = transform_dataframe((items_data),output_table = Table(
+    name="d_item_raw",
+    conn_id=SNOWFLAKE_CONN_ID,
     ))
 
 
+# Merge statement for incremental refresh (update based on key column)
     item_data_merge = aql.merge(target_table=Table(
-        name="d_item",
+        name="d_item_merged",
         conn_id=SNOWFLAKE_CONN_ID,),
         source_table = item_data,
         target_conflict_columns=["item_id"],
@@ -100,5 +62,4 @@ with dag:
     )
 
 # Delete temporary and unnamed tables created by `load_file` and `transform`, in this example
-# item_data
     aql.cleanup()

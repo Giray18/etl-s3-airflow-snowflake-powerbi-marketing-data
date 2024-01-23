@@ -28,8 +28,8 @@ def transform_dataframe(df: DataFrame):
     df = df.rename(columns={"event.payload": "event_payload"})
     # Converting json column data type to Variant on Snowflake
     df["event_payload"] = df["event_payload"].map(lambda x: json.loads(x))
-    # # Index column implementation
-    # df = df.assign(row_number=range(1,len(df)+1))
+    # Index column implementation
+    df = df.assign(guid_event_raw=range(1,len(df)+1))
     return df
 
 # Basic DAG definition
@@ -41,17 +41,26 @@ dag = DAG(
 )
 
 with dag:
-    # Load a file with a header from github repo into Snowflake, referenced by the
+    # Load a file with a header from s3 bucket into Snowflake, referenced by the
     # variable `event_data`. This simulated the `extract` step of the ETL pipeline.
     event_data = aql.load_file(task_id="load_events",input_file=File(S3_FILE_PATH),)
 
 
-
-
-# d_user table saved into snowflake
-    events_data = transform_dataframe((event_data),output_table = Table(
+# event_raw table created and merged into snowflake table as delta loads arrive
+    raw_events_data = transform_dataframe((event_data),output_table = Table(
         name="event_raw",
         conn_id=SNOWFLAKE_CONN_ID,
     ))
 
+# Merge statement for incremental refresh (update based on key column)
+    raw_events_data_merge = aql.merge(target_table=Table(
+    name="event_raw",
+    conn_id=SNOWFLAKE_CONN_ID,),
+    source_table = raw_events_data,
+        target_conflict_columns=["event_payload"],
+        columns=["event_id","event_time","user_id","event_payload","guid_event_raw"],
+        if_conflicts="update",
+    )
+
+# Delete temporary and unnamed tables created by `load_file` and `transform`, in this example
     aql.cleanup()

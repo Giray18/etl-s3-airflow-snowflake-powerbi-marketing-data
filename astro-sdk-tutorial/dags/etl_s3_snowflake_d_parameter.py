@@ -4,7 +4,6 @@ from airflow.models import DAG
 from airflow.providers.snowflake.operators.snowflake import SnowflakeOperator
 from pandas import DataFrame
 import pandas as pd
-import config
 import json
 
 # Import decorators and classes from the SDK
@@ -27,16 +26,15 @@ def transform_dataframe(df: DataFrame):
     # Renaming columns as per needed column naming conventions
     df = df.rename(columns={"event.payload": "event_payload"})
     df["event_payload"] = df["event_payload"].map(lambda x: json.loads(x))
-    # df["event_payload"] = df["event_payload"].map(lambda x: pd.json_normalize(x))
-    # # df = df.rename(config.columns)
-    # # Droping duplicates on USER_ID column to get unique user id holding column
-    # df = df.drop_duplicates(subset=['event_event_id'])
-    # Filtering only needed columns
+    # Filtering only JSON data holding column
     df =  df[['event_payload']]
-    df_flat =pd.json_normalize(df['event_payload'])
-    # df["event_payload"] = df["event_payload"].map(lambda x: pd.json_normalize(x))
+    df_flat = pd.json_normalize(df['event_payload'])
+    # Filtering only needed columns
+    df_flat =  df_flat[['parameter_name']]
+    # Droping duplicates on USER_ID column to get unique user id holding column
+    df_flat = df_flat.drop_duplicates(subset=['parameter_name'])
     # Index column implementation
-    # df = df.assign(row_number=range(1,len(df)+1))
+    df_flat = df_flat.assign(row_number=range(1,len(df_flat)+1))
     return df_flat
 
 # Basic DAG definition
