@@ -52,15 +52,15 @@ with dag:
         conn_id=SNOWFLAKE_CONN_ID,
     ))
 
-# Merge statement for incremental refresh (update based on key column)
-    raw_events_data_merge = aql.merge(target_table=Table(
-    name="event_raw",
-    conn_id=SNOWFLAKE_CONN_ID,),
-    source_table = raw_events_data,
-        target_conflict_columns=["event_payload"],
-        columns=["event_id","event_time","user_id","event_payload","guid_event_raw"],
-        if_conflicts="update",
-    )
+# # Merge statement for incremental refresh (update based on key column)
+#     raw_events_data_merge = aql.merge(target_table=Table(
+#     name="event_raw",
+#     conn_id=SNOWFLAKE_CONN_ID,),
+#     source_table = raw_events_data,
+#         target_conflict_columns=["event_payload"],
+#         columns=["event_id","event_time","user_id","event_payload","guid_event_raw"],
+#         if_conflicts="update",
+#     )
 
 # Delete temporary and unnamed tables created by `load_file` and `transform`, in this example
     aql.cleanup()
