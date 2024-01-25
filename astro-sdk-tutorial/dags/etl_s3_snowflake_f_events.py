@@ -43,6 +43,24 @@ def transform_dataframe(df: DataFrame):
     result = result.assign(guid_event=range(1,len(result)+1))
     return result
 
+
+@aql.run_raw_sql
+def create_table(table: Table):
+    """Create the user table data which will be the target of the merge method"""
+    return """
+      CREATE OR REPLACE TABLE {{table}} 
+      (
+      event_id VARCHAR(100),
+      event_time DATETIME,
+      user_id VARCHAR(100),
+      event_name VARCHAR(100),
+      platform VARCHAR(100),
+      parameter_name VARCHAR(100),
+      parameter_value VARCHAR(100),
+      guid_event VARCHAR(100)
+    );
+    """
+
 # Basic DAG definition
 dag = DAG(
     dag_id="f_events_table_create",
@@ -56,12 +74,17 @@ with dag:
     # variable `event_data`. This simulated the `extract` step of the ETL pipeline.
     event_data = aql.load_file(task_id="load_events",input_file=File(S3_FILE_PATH),)
 
+    # Create the user table data which will be the target of the merge method
+    def example_snowflake_partial_table_with_append():
+        f_events = Table(name="f_events", temp=True, conn_id=SNOWFLAKE_CONN_ID)
+        create_user_table = create_table(table=f_events, conn_id=SNOWFLAKE_CONN_ID)
 
+    example_snowflake_partial_table_with_append()
 
 
 # f_events table created and merged into snowflake table as delta loads arrive
     events_data = transform_dataframe((event_data),output_table = Table(
-        # name="f_events",
+        name="f_events_raw",
         conn_id=SNOWFLAKE_CONN_ID,
     ))
 

@@ -34,8 +34,19 @@ def transform_dataframe(df: DataFrame):
     # Droping duplicates on USER_ID column to get unique user id holding column
     df_flat = df_flat.drop_duplicates(subset=['parameter_name'])
     # Index column implementation
-    df_flat = df_flat.assign(row_number=range(1,len(df_flat)+1))
+    df_flat = df_flat.assign(guid_parameter=range(1,len(df_flat)+1))
     return df_flat
+
+@aql.run_raw_sql
+def create_table(table: Table):
+    """Create the user table data which will be the target of the merge method"""
+    return """
+      CREATE OR REPLACE TABLE {{table}} 
+      (
+      parameter_name VARCHAR(100),
+      guid_parameter VARCHAR(100)
+    );
+    """
 
 # Basic DAG definition
 dag = DAG(
@@ -50,13 +61,29 @@ with dag:
     # variable `event_data`. This simulated the `extract` step of the ETL pipeline.
     event_data = aql.load_file(task_id="load_events",input_file=File(S3_FILE_PATH),)
 
+    # Create the user table data which will be the target of the merge method
+    def example_snowflake_partial_table_with_append():
+        d_parameter = Table(name="d_parameter", temp=True, conn_id=SNOWFLAKE_CONN_ID)
+        create_user_table = create_table(table=d_parameter, conn_id=SNOWFLAKE_CONN_ID)
 
+    example_snowflake_partial_table_with_append()
 
 
 # d_user table saved into snowflake
     events_data = transform_dataframe((event_data),output_table = Table(
-        name="d_parameter",
+        name="d_parameter_raw",
         conn_id=SNOWFLAKE_CONN_ID,
     ))
+
+
+# Merge statement for incremental refresh (update based on key column)
+    event_data_merge = aql.merge(target_table=Table(
+    name = "d_parameter",
+    conn_id=SNOWFLAKE_CONN_ID,),
+    source_table = events_data,
+        target_conflict_columns=["parameter_name"],
+        columns=["parameter_name","guid_parameter"],
+        if_conflicts="ignore",
+    )
 
     aql.cleanup()

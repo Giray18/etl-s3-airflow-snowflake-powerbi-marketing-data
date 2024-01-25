@@ -29,6 +29,22 @@ def transform_dataframe(df: DataFrame):
     # df = df.rename(config.columns)
     return df
 
+@aql.run_raw_sql
+def create_table(table: Table):
+    """Create the user table data which will be the target of the merge method"""
+    return """
+      CREATE OR REPLACE TABLE {{table}} 
+      (
+      item_adjective VARCHAR(100),
+      item_category VARCHAR(100),
+      item_created_at DATETIME,
+      item_id VARCHAR(100),
+      item_modifier VARCHAR(100),
+      item_name VARCHAR(100),
+      item_price DECIMAL(20,2)
+    );
+    """
+
 # Basic DAG definition
 dag = DAG(
     dag_id="d_items_table_create",
@@ -42,6 +58,13 @@ with dag:
     # variable `event_data`. This simulated the `extract` step of the ETL pipeline.
     items_data = aql.load_file(task_id="load_items",input_file=File(S3_FILE_PATH),)
 
+    # Create the user table data which will be the target of the merge method
+    def example_snowflake_partial_table_with_append():
+        d_item = Table(name="d_item", temp=True, conn_id=SNOWFLAKE_CONN_ID)
+        create_user_table = create_table(table=d_item, conn_id=SNOWFLAKE_CONN_ID)
+
+    example_snowflake_partial_table_with_append()
+
 
 # d_item table created and merged into snowflake table as delta loads arrive
     item_data = transform_dataframe((items_data),output_table = Table(
@@ -52,7 +75,7 @@ with dag:
 
 # Merge statement for incremental refresh (update based on key column)
     item_data_merge = aql.merge(target_table=Table(
-        name="d_item_merged",
+        name="d_item",
         conn_id=SNOWFLAKE_CONN_ID,),
         source_table = item_data,
         target_conflict_columns=["item_id"],
