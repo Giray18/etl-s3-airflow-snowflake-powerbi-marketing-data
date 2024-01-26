@@ -27,13 +27,10 @@ S3_FILE_PATH = "https://merkle-de-interview-case-study.s3.eu-central-1.amazonaws
 # Define a function for transforming tables to dataframes and dataframe transformations
 @aql.dataframe
 def transform_dataframe(df: DataFrame):
-    # Renaming columns as per needed column naming conventions
-    df = df.rename(columns={"user_id": "event_user_id"})
-    # df = df.rename(config.columns)
     # Droping duplicates on USER_ID column to get unique user id holding column
-    df = df.drop_duplicates(subset=['event_user_id'])
+    df = df.drop_duplicates(subset=['user_id'])
     # Filtering only needed columns
-    df =  df[['event_user_id']]
+    df =  df[['user_id']]
     # Index column implementation
     df = df.assign(guid_user=range(1,len(df)+1))
     return df
@@ -44,7 +41,7 @@ def create_table(table: Table):
     return """
       CREATE OR REPLACE TABLE {{table}} 
       (
-      event_user_id VARCHAR(100),
+      user_id VARCHAR(100),
       guid_user VARCHAR(100)
     );
     """
@@ -80,8 +77,8 @@ with dag:
     name="d_user",
     conn_id=SNOWFLAKE_CONN_ID,),
     source_table = user_data,
-        target_conflict_columns=["event_user_id"],
-        columns=["event_user_id","guid_user"],
+        target_conflict_columns=["user_id"],
+        columns=["user_id","guid_user"],
         if_conflicts="ignore",
     )
 

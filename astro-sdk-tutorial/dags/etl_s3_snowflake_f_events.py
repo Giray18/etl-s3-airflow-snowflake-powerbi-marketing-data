@@ -39,6 +39,9 @@ def transform_dataframe(df: DataFrame):
     result = result.sort_values(by=['event_time'], ascending=False)
     # Drop unnecessary columns
     result = result.drop(['event_payload','row_number'],axis = 1)
+    # Second column renaming for JSON exploded columns
+    result = result.rename(columns={"platform": "event_platform","parameter": "event_parameter_name","user_id" : "event_user_id",
+                                    "parameter_name": "event_parameter_name", "parameter_value": "event_parameter_value"})
     # Index column implementation
     result = result.assign(guid_event=range(1,len(result)+1))
     return result
@@ -52,11 +55,11 @@ def create_table(table: Table):
       (
       event_id VARCHAR(100),
       event_time DATETIME,
-      user_id VARCHAR(100),
+      event_user_id VARCHAR(100),
       event_name VARCHAR(100),
-      platform VARCHAR(100),
-      parameter_name VARCHAR(100),
-      parameter_value VARCHAR(100),
+      event_platform VARCHAR(100),
+      event_parameter_name VARCHAR(100),
+      event_parameter_value VARCHAR(100),
       guid_event VARCHAR(100)
     );
     """
@@ -93,9 +96,9 @@ with dag:
         name="f_events",
         conn_id=SNOWFLAKE_CONN_ID,),
         source_table = events_data,
-        target_conflict_columns=["event_id","parameter_name","parameter_value"],
-        columns=["event_id","event_time","user_id","event_name","platform"
-                 ,"parameter_name","parameter_value","guid_event"],
+        target_conflict_columns=["event_id","event_parameter_name","event_parameter_value"],
+        columns=["event_id","event_time","event_user_id","event_name","event_platform"
+                 ,"event_parameter_name","event_parameter_value","guid_event"],
         if_conflicts="update",
     )
 
