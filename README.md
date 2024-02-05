@@ -30,10 +30,10 @@ As learned by data architects of the company online channels historical usage da
   * event_time : date time value of event (not nullable)
   * user_id : unique id of user who commit event action (not nullable)
   * event.payload :  JSON structured field consisting of nested fields 
-    * event_name : event identifier like (view_item) (not nullable)
-    * platform : platform where event takes place (not nullable)
+    * event_name : event identifier (e.g view_item) (not nullable)
+    * platform : platform where event takes place (e.g web, android) (not nullable)
     * parameter_name :  parameter used in event (e.g item_id) (not nullable)
-    * parameter value : value of parameter used in the event (not nullable)
+    * parameter value : value of parameter used in the event (int value) (not nullable)
 
 
 
