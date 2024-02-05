@@ -16,14 +16,24 @@ Mainly, they would like to see 4 metric as below and consulted their data engine
 As learned by data architects of the company online channels historical usage data resides on an AWS S3 storage location.
 2 files mentioned as keeping requested tracks,
 
-* items.csv consisting of below fields; (Mentioned file can be found on files)
+* items.csv consisting of below fields and creates source of truth for items; (Mentioned file can be found on files)
   * adjective : categorical value defines main function of a product (nullable)
   * category :  categorical value defines product category (not nullable)
   * created_at : date time value defines when product created at sales system (e.g SAP) (not nullable)
   * ID : unique id of a product (not nullable)
   * modifier : categorical value defines sub feature of a product (nullable)
-  * name : product name being created by concat of adjective + category + modifier
-  * price : product price
+  * name : product name being created by concat of adjective + category + modifier (not nullable)
+  * price : product price (not nullable)
+ 
+* event.csv consisting of below fields and creates source of truth for items; (Mentioned file can be found on files)
+  * event_id :  unique id assigned by online apps for user actions (not nullable)
+  * event_time : date time value of event (not nullable)
+  * user_id : unique id of user who commit event action (not nullable)
+  * event.payload :  JSON structured field consisting of nested fields 
+    * event_name : event identifier like (view_item) (not nullable)
+    * platform : platform where event takes place (not nullable)
+    * parameter_name :  parameter used in event (e.g item_id) (not nullable)
+    * parameter value : value of parameter used in the event (not nullable)
 
 
 
