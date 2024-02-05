@@ -1,5 +1,5 @@
-# Data_engineering ETL activites from S3 bucket (Storage) - Airflow (ETL) - Snowflake (Data Mart (Storage) - Power BI (Visualization)
-This Repo contains activities related to ETL, data mart creation and advanced analytics as tool S3-AIRFLOW-SNOWFLAKE and Power BI used
+# Data engineering ETL activites with S3 bucket (Storage) - Airflow (ETL) - Snowflake (Data Mart (Storage) - Power BI (Visualization)
+This Repo contains activities related to ETL, data mart creation and visualization. As tool S3-AIRFLOW-SNOWFLAKE and Power BI used
 
 # Task Scenario:
 A marketing and a sales team would like to delve into their retail store`s item view data browsed by users to see mostly viewed items and platform used on item views.
