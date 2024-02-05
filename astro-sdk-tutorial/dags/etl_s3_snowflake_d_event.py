@@ -2,9 +2,10 @@ from datetime import datetime
 from airflow import Dataset
 from airflow.models import DAG
 from airflow.providers.snowflake.operators.snowflake import SnowflakeOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from pandas import DataFrame
 import pandas as pd
-import config
+import json
 
 # Import decorators and classes from the SDK
 from astro import sql as aql
@@ -16,7 +17,6 @@ import sqlalchemy
 
 # Define constants/variables for interacting with external systems
 SNOWFLAKE_CONN_ID = "snowflake_default"
-S3_FILE_PATH = "https://merkle-de-interview-case-study.s3.eu-central-1.amazonaws.com/de/event.csv"
 
 
 # Define a function for transforming tables to dataframes and dataframe transformations
@@ -51,25 +51,21 @@ dag = DAG(
 )
 
 with dag:
-    # Load a file with a header from S3 bucket into Snowflake, referenced by the
-    # variable `event_data`. This simulated the `extract` step of the ETL pipeline.
-    event_data = aql.load_file(task_id="load_events",input_file=File(S3_FILE_PATH),)
+    # Load data from raw layer tables into a variable (temp table) for further transformations
+    event_data = Table(name="event_raw", temp=True, conn_id=SNOWFLAKE_CONN_ID)
+
 
     # Create the user table data which will be the target of the merge method
-    def example_snowflake_partial_table_with_append():
-        d_event = Table(name="d_event", temp=True, conn_id=SNOWFLAKE_CONN_ID)
-        create_user_table = create_table(table=d_event, conn_id=SNOWFLAKE_CONN_ID)
-
-    example_snowflake_partial_table_with_append()
+    d_event = Table(name="d_event", temp=True, conn_id=SNOWFLAKE_CONN_ID)
+    create_event_table = create_table(table = d_event, conn_id=SNOWFLAKE_CONN_ID)
 
 
-# d_event table created and merged into snowflake table as delta loads arrive
+    # d_event table created and merged into snowflake table as delta loads arrive
     events_data = transform_dataframe((event_data),output_table = Table(
-        name = "d_event_raw",
         conn_id = SNOWFLAKE_CONN_ID,
     ))
 
-# Merge statement for incremental refresh (update based on key column)
+    # Merge statement for incremental refresh (update based on key column)
     event_data_merge = aql.merge(target_table=Table(
     name = "d_event",
     conn_id=SNOWFLAKE_CONN_ID,),
@@ -79,5 +75,16 @@ with dag:
         if_conflicts="ignore",
     )
 
-# Delete temporary and unnamed tables created by `load_file` and `transform`, in this example
+    # Triggering next dag
+    trigger_dependent_dag = TriggerDagRunOperator(
+    task_id="trigger_dependent_dag",
+    trigger_dag_id="d_items_table_create",
+    wait_for_completion=False,
+    deferrable=False,  
+    )
+
+    # Dependencies
+    create_event_table >>  events_data >> event_data_merge >> trigger_dependent_dag
+
+    # Delete temporary and unnamed tables created by `load_file` and `transform`, in this example
     aql.cleanup()

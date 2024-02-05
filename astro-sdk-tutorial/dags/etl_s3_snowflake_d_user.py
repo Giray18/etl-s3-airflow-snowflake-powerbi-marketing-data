@@ -2,9 +2,9 @@ from datetime import datetime
 from airflow import Dataset
 from airflow.models import DAG
 from airflow.providers.snowflake.operators.snowflake import SnowflakeOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from pandas import DataFrame
 import pandas as pd
-import config
 import json
 
 #sqlalchemy-Snowflake JSON handling packages
@@ -22,7 +22,6 @@ import sqlalchemy
 
 # Define constants/variables for interacting with external systems
 SNOWFLAKE_CONN_ID = "snowflake_default"
-S3_FILE_PATH = "https://merkle-de-interview-case-study.s3.eu-central-1.amazonaws.com/de/event.csv"
 
 # Define a function for transforming tables to dataframes and dataframe transformations
 @aql.dataframe
@@ -55,20 +54,16 @@ dag = DAG(
 )
 
 with dag:
-    # Load a file with a header from s3 bucket into Snowflake, referenced by the
-    # variable `event_data`. This simulated the `extract` step of the ETL pipeline.
-    event_data = aql.load_file(task_id="load_events",input_file=File(S3_FILE_PATH),)
+    # Load data from raw layer tables into a variable (temp table) for further transformations
+    event_data = Table(name="event_raw", temp=True, conn_id=SNOWFLAKE_CONN_ID)
 
     # Create the user table data which will be the target of the merge method
-    def example_snowflake_partial_table_with_append():
-        d_user = Table(name="d_user", temp=True, conn_id=SNOWFLAKE_CONN_ID)
-        create_user_table = create_table(table=d_user, conn_id=SNOWFLAKE_CONN_ID)
-
-    example_snowflake_partial_table_with_append()
+    d_user = Table(name="d_user", temp=True, conn_id=SNOWFLAKE_CONN_ID)
+    create_user_table = create_table(table=d_user, conn_id=SNOWFLAKE_CONN_ID)
 
     # d_user table created and merged into snowflake table as delta loads arrive
     user_data = transform_dataframe((event_data),output_table = Table(
-        name="d_user_raw",
+        # name="d_user_raw",
         conn_id=SNOWFLAKE_CONN_ID,
     ))
 
@@ -81,6 +76,17 @@ with dag:
         columns=["user_id","guid_user"],
         if_conflicts="ignore",
     )
+
+    # Triggering next dag
+    trigger_dependent_dag = TriggerDagRunOperator(
+    task_id="trigger_dependent_dag",
+    trigger_dag_id="f_events_table_create",
+    wait_for_completion=False,
+    deferrable=False,  
+    )
+
+    # Dependencies
+    create_user_table >>  user_data >> user_data_merge >> trigger_dependent_dag
 
 
     # Delete temporary and unnamed tables created by `load_file` and `transform`, in this example
