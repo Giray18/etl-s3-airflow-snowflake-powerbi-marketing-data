@@ -36,7 +36,8 @@ As learned by data architects of the company, online channels historical usage d
     * parameter value : value of parameter used in the event (int value) (not nullable)
 
 # Target Stage:
-Based on current stage and ETL pipeline will be establish to create visuals containing requested metrics on PBI platform.
+Based on current stage definition, an ETL pipeline will be establish to transform raw data in 2 csv files to establish a data model consisting of fact and dim tables. 
+In order to create visuals containing requested metrics on PBI platform.
 Below flow diagram will be implemented as solution.
 
 ![picture alt](flow-diagram-etl-flow-diagram.jpg)
