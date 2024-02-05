@@ -37,7 +37,7 @@ As learned by data architects of the company, online channels historical usage d
 
 # Target Stage:
 Based on current stage definition, an ETL pipeline will be establish to transform raw data in 2 csv files to establish a data model consisting of fact and dim tables that can give users opportunity to have their self service BI. 
-In order to create visuals containing requested metrics on PBI platform. Also, materialized views will be located on Snowflake and PBI will consume them which will provide exact answers of what business requires to learn.
+Also, materialized views will be located on Snowflake and PBI will consume them which will provide exact answers of what business requires to learn.
 Below flow diagram will be implemented as solution.
 
 ![picture alt](flow-diagram-etl-flow-diagram.jpg)
