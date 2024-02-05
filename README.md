@@ -2,7 +2,7 @@
 This Repo contains activities related to ETL, data mart creation and visualization. As tool S3-AIRFLOW-SNOWFLAKE and Power BI used
 
 # Task Scenario:
-A marketing and a sales team would like to delve into their retail store`s item view data browsed by users to see mostly viewed items and platform used on item views.
+A marketing and a sales team would like to delve into their retail store digital shop item view data browsed by users to see mostly viewed items and platform used on item views.
 Needed data will define company`s action plan to invest on mobile app or not and measure sales amount of items comparing with views of items.
 
 Mainly they would like to see 4 metric as below and consult their data engineer get help on that;
