@@ -39,7 +39,7 @@ As learned by data architects of the company, online channels historical usage d
 Based on current stage and ETL pipeline will be establish to create visuals containing requested metrics on PBI platform.
 Below flow diagram will be implemented as solution.
 
-![picture alt](flow diagram-etl_flow_diagram.drawio.jpg)
+![picture alt](flow-diagram-etl-flow-diagram.jpg)
 
 
 
