@@ -49,7 +49,7 @@ S3 Cloud Storage : As mentioned 2 csv files located on a storage endpoint. No fu
 
 Airflow ETL Design : Below design shown on schema is used for ETL design. DAGS on airflow will get data from S3 location transform and load into database/schema in a daily scheduled manner. Trigger of DAGS will be done by themselves, which means first raw_data table DAG will run and trigger next one as a sequence, dims table DAGS will run following each other at last fact table dag will run and ETL cycle will be completed.
 
-![picture alt](flow-diagram-etl-flow-diagram.jpg)
+![picture alt](flow diagram-ETL_design.jpg)
 
 
 
