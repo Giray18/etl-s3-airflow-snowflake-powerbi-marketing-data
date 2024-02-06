@@ -36,14 +36,20 @@ As learned by data architects of the company, online channels historical usage d
     * parameter value : value of parameter used in the event (int value) (not nullable)
 
 # Target State:
-Based on current stage definition, an ETL pipeline will be establish to transform raw data in 2 csv files to establish a data model consisting of fact and dim tables that can give users opportunity to have their self service BI. 
-Also, materialized views will be located on Snowflake and PBI will consume them which will provide exact answers of what business requires to learn.
-Below flow diagram will be implemented as solution.
+Based on current state definition, an ETL pipeline will be established to transform raw data in 2 csv files to establish a data model consisting of fact and dim tables that can give users opportunity to have their self service BI by PowerBI. 
+Also, materialized views will be located on Snowflake and PowerBI will consume them which will provide exact & allways available answers of what business requires to learn.
+Below on flow diagram demonstration of the solution will be implemented.
 
 ![picture alt](flow-diagram-etl-flow-diagram.jpg)
 
 
+## Detailed Design of the solution
 
+S3 Cloud Storage : As mentioned 2 csv files located on a storage endpoint. No further actions will be taken for storage
+
+Airflow ETL Design : Below design shown on schema is used for ETL design. DAGS on airflow will get data from S3 location transform and load into database/schema in a daily scheduled manner. Trigger of DAGS will be done by themselves, which means first raw_data table DAG will run and trigger next one as a sequence, dims table DAGS will run following each other at last fact table dag will run and ETL cycle will be completed.
+
+![picture alt](flow-diagram-etl-flow-diagram.jpg)
 
 
 
