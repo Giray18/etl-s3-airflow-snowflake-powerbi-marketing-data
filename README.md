@@ -54,7 +54,7 @@ Airflow ETL Design : Below design shown on schema is used for ETL design. DAGS o
 Snowflake_Database_Design : Below data model will be created as result of ETL process. A fact and dim tables will be connected each other in one-many refential integrity. By this model users on PowerBI will have capability to create further analysis addition to requests defined.
 Below is the E-R diagram of data model.
 
-![picture alt](flow-diagram-data_model.jpg)
+![picture alt](flow diagram-data-model.jpg)
 
 
 
