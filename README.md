@@ -54,10 +54,10 @@ For example if an item`s price changes Items only related fields will be updated
 
 ![picture alt](flow-diagram-ETL-design.jpg)
 
-Snowflake_Database_Design : Below data model will be created as result of ETL process. A fact and dim tables will be connected each other in one-many refential integrity. By this model users on PowerBI will have capability to create further analysis addition to requests defined.
-Below is the E-R diagram of data model.
+Snowflake Database Design : Below data model will be created as result of ETL process. A fact and dim tables will be connected each other in one-many refential integrity. By this model users on PowerBI will have capability to create further analysis addition to requests defined.
+Below is the E-R diagram of data model and shown tables gathered into PowerBI Desktop for further visualization works.
 
 ![picture alt](flow-diagram-data-model.jpg)
 
-
+![picture alt](PBI-model.jpg)
 
