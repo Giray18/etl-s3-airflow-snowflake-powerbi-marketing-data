@@ -59,5 +59,5 @@ Below is the E-R diagram of data model and shown tables gathered into PowerBI De
 
 ![picture alt](flow-diagram-data-model.jpg)
 
-![picture alt](PBI-model.jpg)
+![picture alt](PBI-model.png)
 
