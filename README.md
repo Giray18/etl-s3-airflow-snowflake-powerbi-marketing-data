@@ -1,4 +1,4 @@
-# Data engineering and ETL activites with S3 bucket (Storage) - Airflow (ETL) - Snowflake (Data Mart (Storage) - Power BI (Visualization) on Marketing Data Sample
+# Data engineering and ETL activites with S3 bucket (Cloud Storage) - Airflow (ETL) - Snowflake (Data Mart (Storage)) - Power BI (Visualization) on Marketing Data Sample
 This Repo contains activities related to ETL, data mart creation and visualization. As tool S3-AIRFLOW-SNOWFLAKE and Power BI used
 
 # Task Scenario:
@@ -12,7 +12,7 @@ Mainly, they would like to see 4 metric as below and consulted their data engine
   - What is the most viewed item on recent year and how many times viewed? (In the latest year on dataset)
   - What are the item view amounts and view ranks as yearly distributed?
 
-# Current Stage:
+# Current State:
 As learned by data architects of the company, online channels historical usage data resides on an AWS S3 storage location.
 2 files mentioned as keeping requested data with belo metadata, mentioned files are being upserted in a daily schedule,
 
@@ -35,15 +35,21 @@ As learned by data architects of the company, online channels historical usage d
     * parameter_name :  parameter used in event (e.g item_id) (not nullable)
     * parameter value : value of parameter used in the event (int value) (not nullable)
 
-# Target Stage:
-Based on current stage definition, an ETL pipeline will be establish to transform raw data in 2 csv files to establish a data model consisting of fact and dim tables that can give users opportunity to have their self service BI. 
-Also, materialized views will be located on Snowflake and PBI will consume them which will provide exact answers of what business requires to learn.
-Below flow diagram will be implemented as solution.
+# Target State:
+Based on current state definition, an ETL pipeline will be established to transform raw data in 2 csv files to establish a data model consisting of fact and dim tables that can give users opportunity to have their self service BI by PowerBI. 
+Also, materialized views will be located on Snowflake and PowerBI will consume them which will provide exact & allways available answers of what business requires to learn.
+Below on flow diagram demonstration of the solution will be implemented.
 
 ![picture alt](flow-diagram-etl-flow-diagram.jpg)
 
 
+## Detailed Design of the solution
 
+S3 Cloud Storage : As mentioned 2 csv files located on a storage endpoint. No further actions will be taken for storage
+
+Airflow ETL Design : Below design shown on schema is used for ETL design. DAGS on airflow will get data from S3 location transform and load into database/schema in a daily scheduled manner. Trigger of DAGS will be done by themselves, which means first raw_data table DAG will run and trigger next one as a sequence, dims table DAGS will run following each other at last fact table dag will run and ETL cycle will be completed.
+
+![picture alt](flow diagram-ETL_design.jpg)
 
 
 
