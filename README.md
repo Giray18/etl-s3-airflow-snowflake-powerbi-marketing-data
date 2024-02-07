@@ -1,20 +1,23 @@
 # Data engineering and ETL activites with S3 bucket (Cloud Storage) - Airflow (ETL) - Snowflake (Data Mart (Storage)) - Power BI (Visualization) on Marketing Data Sample
-This Repo contains activities related to ETL, data mart creation and visualization. As tool S3-AIRFLOW-SNOWFLAKE and Power BI used
+This Repo contains activities related to ETL, data mart creation and visualization. As tool/platform S3-AIRFLOW-SNOWFLAKE and Power BI used
 
 # Task Scenario:
 A marketing and a sales team would like to delve into their retail store digital shop item view data browsed by users in order to see mostly viewed items, sales success of same items and measure digital shop platform preference of users.
-Needed data will define company`s action plan to invest on mobile app or not and measure sales amount of items comparing with views of items.
+Needed data also will define company`s action plan to invest on mobile app or not and give awareness to sales team to compare sales amount of items comparing with views of items.
 
-Mainly, they would like to see 4 metric as below and consulted their data engineer to be able to accurately tracking those metrics;
+Mainly, they would like to see metrics that answers below business questions and consulted their data engineer to be able to accurately tracking those metrics;
 
-  - What is the most used platform on item views among channels (web, mobile app etc.) in a yearly based as time period?
+  - What is the most used platform on item views among platforms (web, mobile app etc.) in a yearly based as time period? and How all platforms performing?
   - What is the yearly amount of item views on all platforms?
   - What is the most viewed item on recent year and how many times viewed? (In the latest year on dataset)
   - What are the item view amounts and view ranks as yearly distributed?
+  - What is the trend in view amounts comparing year by year?
+  - What is the detailed view performance of top 10 most viewed items in a particular year?
+  - Is there any item dominantly view among all items? What are the distribution of views in top 10 items?
 
 # Current State:
-As learned by data architects of the company, online channels historical usage data resides on an AWS S3 storage location.
-2 files mentioned as keeping requested data with belo metadata, mentioned files are being upserted in a daily schedule,
+As learned by data architects of the company, online platforms historical usage data resides on an AWS S3 storage location.
+2 files mentioned as keeping requested data with belo metadata, mentioned files are being upserted in a daily schedule, (Files can be found on attachments of repo)
 
 * items.csv consisting of below fields and creates source of truth for items; (Mentioned file can be found on files)
   * adjective : categorical value defines main function of a product (nullable)
@@ -25,6 +28,8 @@ As learned by data architects of the company, online channels historical usage d
   * name : product name being created by concat of adjective + category + modifier (not nullable)
   * price : product price (not nullable)
  
+![picture alt](items-first-3-line.png)
+ 
 * event.csv consisting of below fields and creates source of truth for items; (Mentioned file can be found on files)
   * event_id :  unique id assigned by online apps for user actions (not nullable)
   * event_time : date time value of event (not nullable)
@@ -34,6 +39,8 @@ As learned by data architects of the company, online channels historical usage d
     * platform : platform where event takes place (e.g web, android) (not nullable)
     * parameter_name :  parameter used in event (e.g item_id) (not nullable)
     * parameter value : value of parameter used in the event (int value) (not nullable)
+
+![picture alt](events-first-3-line.png)
 
 # Target State:
 Based on current state definition, an ETL pipeline will be established to transform raw data in 2 csv files to establish a data model consisting of fact and dim tables that can give users opportunity to have their self service BI by PowerBI. 
