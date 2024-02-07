@@ -83,6 +83,7 @@ Below is the view of data model modified in PowerBI desktop.
 # PowerBI report:
 
 Below screenshot shows report created, Explanations regarding visuals shown on screenshot. Used PowerBI Desktop PBIX files can be found on attachment (marketing_example_2.pbix)
+As designed report will refresh itself aligned with ETL process refresh schedule. As a result, users will see data data daily updated (holding importance for top 10 viewed products)
 
 ![picture alt](report-overview.jpg)
 
