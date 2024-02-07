@@ -68,7 +68,7 @@ Below is the E-R diagram of data model and shown tables gathered into PowerBI De
 
 Tables from Snowflake imported into PBIX file by ODBC connection (Metadata of tables can be found on REPO`s Snowflake_tables)
 
-![picture alt](tables-pbi-import.jpg)
+![picture alt](tables-pbi-import.png)
 
 **Power BI Data Model Design** : In order to create more performant PBI report some data model modifications done on PBI desktop. A Date_Time table created by AUTOCALENDAR function to bind tables with Views created on Snowflake. An extra Connection_TBL created to provide connection between tables that has many-many connection. Table holding created measures for additionnal calculations made on PBI. A helper table which runs a query that creates and reflects latest refresh time of report.
 
