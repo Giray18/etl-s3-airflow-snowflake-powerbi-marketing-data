@@ -72,7 +72,7 @@ Tables from Snowflake imported into PBIX file (Metadata of tables can be found o
 
 Below is the view of data model modified in PowerBI desktop.
 
-![picture alt](PBI-data-model.png)
+![picture alt](PBI-data-model.jpg)
 
 
 
