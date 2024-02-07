@@ -60,7 +60,7 @@ Below is screenshot reflects DAGs created. DAGS can be found on REPO`s astro-sdk
 ![picture alt](dags-1.png)
 
 Almost all of the tables being refreshed by data delta loads with MERGE INTO command. Based on spesific keys transactions are updated (SCD-1) or new transactions are inserted. 
-For example if an item`s price changes item`s only related fields will be updated by new price value. When new events gathered events will be appended to related tables.
+For example if an item`s price changes only related fields will be updated by new price value. When new events gathered events will be appended to related tables.
 
 ![picture alt](flow-diagram-ETL-design.jpg)
 
