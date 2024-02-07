@@ -52,21 +52,21 @@ Below shown flow diagram demonstration of the solution will be implemented.
 
 ## Detailed Design of the solution
 
-### S3 Cloud Storage : As mentioned 2 csv files located on a storage endpoint. No further actions will be taken for storage
+**S3 Cloud Storage** : As mentioned 2 csv files located on a storage endpoint. No further actions will be taken for storage
 
-Airflow ETL Design : Below design shown on schema is used for ETL design. DAGS on airflow will get data from S3 location transform and load into database/schema in a daily scheduled manner. Trigger of DAGS will be done by themselves, which means first raw_data table DAG will run and trigger next DAG as a sequence, dims table DAGS will run first following each other at last fact table dag will run and ETL cycle will be completed.
+**Airflow ETL Design** : Below design shown on schema is used for ETL design. DAGS on airflow will get data from S3 location transform and load into database/schema in a daily scheduled manner. Trigger of DAGS will be done by themselves, which means first raw_data table DAG will run and trigger next DAG as a sequence, dims table DAGS will run first following each other at last fact table dag will run and ETL cycle will be completed.
 
 Almost all of the tables being refreshed by data delta loads with MERGE INTO command. Based on spesific keys transactions are updated (SCD-1) or new transactions are inserted. 
 For example if an item`s price changes Items only related fields will be updated by new price value. When new events gathered they will be appended to event related tables.
 
 ![picture alt](flow-diagram-ETL-design.jpg)
 
-Snowflake Database Design : Below data model will be created as result of ETL process. A fact and dim tables will be connected each other in one-many refential integrity. By this model users on PowerBI will have capability to create further analysis addition to requests defined.
+**Snowflake Database Design** : Below data model will be created as result of ETL process. A fact and dim tables will be connected each other in one-many refential integrity. By this model users on PowerBI will have capability to create further analysis addition to requests defined.
 Below is the E-R diagram of data model and shown tables gathered into PowerBI Desktop for further visualization works.
 
 ![picture alt](flow-diagram-data-model.jpg)
 
 Tables from Snowflake imported into PBIX file (Metadata of tables can be found on REPO`s Snowflake_tables)
 
-Snowflake Database Design :
+**Power BI Data Model Design** :
 
