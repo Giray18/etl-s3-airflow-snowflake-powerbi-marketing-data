@@ -54,13 +54,13 @@ Below shown flow diagram demonstration of the solution will be implemented.
 
 **S3 Cloud Storage** : As mentioned 2 csv files located on a storage endpoint. No further actions will be taken for storage
 
-**Airflow ETL Design** : Below design shown on schema is used for ETL design. DAGS on airflow will get data from S3 location transform and load into database/schema in a daily scheduled manner. Trigger of DAGS will be done by themselves, which means first raw_data table DAG will run and trigger next DAG as a sequence, dims table DAGS will run first following each other at last fact table dag will run and ETL cycle will be completed.
+**Airflow ETL Design** : Below design shown on schema is used for ETL design. DAGS on airflow will get data from S3 location transform and load into database/schema in a daily scheduled manner. Trigger of DAGS will be done by themselves, which means first raw_events table DAG will run then trigger next DAGs in a sequence, dims table DAGS will run first following each other at last fact table dag will run and ETL cycle will be completed after views are also populated.
 Below is screenshot reflects DAGs created. DAGS can be found on REPO`s astro-sdk-tutorial/dags folder (https://github.com/Giray18/etl-s3-airflow-snowflake-marketing-data/tree/1273872dd9a53f750a6def4fb15a9f15c28f79ea/astro-sdk-tutorial/dags)
 
 ![picture alt](dags-1.png)
 
 Almost all of the tables being refreshed by data delta loads with MERGE INTO command. Based on spesific keys transactions are updated (SCD-1) or new transactions are inserted. 
-For example if an item`s price changes Items only related fields will be updated by new price value. When new events gathered they will be appended to event related tables.
+For example if an item`s price changes item`s only related fields will be updated by new price value. When new events gathered events will be appended to related tables.
 
 ![picture alt](flow-diagram-ETL-design.jpg)
 
