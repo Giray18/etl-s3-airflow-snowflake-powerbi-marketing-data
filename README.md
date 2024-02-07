@@ -82,6 +82,9 @@ Below is the view of data model modified in PowerBI desktop.
 
 # PowerBI report:
 
+Below screenshot shows report created, Explanations regarding visuals shown on screenshot. Used PowerBI Desktop PBIX files can be found on attachment (marketing_example_2.pbix)
+
+![picture alt](report-overview.jpg)
 
 
 
