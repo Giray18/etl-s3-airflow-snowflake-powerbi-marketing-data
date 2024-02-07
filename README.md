@@ -44,8 +44,8 @@ As learned by data architects of the company, online platforms historical usage 
 
 # Target State:
 Based on current state definition, an ETL pipeline will be established to transform raw data in 2 csv files to establish a data model consisting of fact and dim tables that can give users opportunity to have their self service BI by PowerBI. 
-Also, materialized views will be located on Snowflake and PowerBI will consume them which will provide exact & allways available answers of what business requires to learn.
-Below on flow diagram demonstration of the solution will be implemented.
+Also, materialized views will be located on Snowflake then PowerBI will consume them which will provide exact & allways available answers of what business requires to learn.
+Below shown flow diagram demonstration of the solution will be implemented.
 
 ![picture alt](flow-diagram-etl-flow-diagram.jpg)
 
@@ -54,10 +54,10 @@ Below on flow diagram demonstration of the solution will be implemented.
 
 S3 Cloud Storage : As mentioned 2 csv files located on a storage endpoint. No further actions will be taken for storage
 
-Airflow ETL Design : Below design shown on schema is used for ETL design. DAGS on airflow will get data from S3 location transform and load into database/schema in a daily scheduled manner. Trigger of DAGS will be done by themselves, which means first raw_data table DAG will run and trigger next one as a sequence, dims table DAGS will run following each other at last fact table dag will run and ETL cycle will be completed.
+Airflow ETL Design : Below design shown on schema is used for ETL design. DAGS on airflow will get data from S3 location transform and load into database/schema in a daily scheduled manner. Trigger of DAGS will be done by themselves, which means first raw_data table DAG will run and trigger next DAG as a sequence, dims table DAGS will run first following each other at last fact table dag will run and ETL cycle will be completed.
 
 Almost all of the tables being refreshed by data delta loads with MERGE INTO command. Based on spesific keys transactions are updated (SCD-1) or new transactions are inserted. 
-For example if an item`s price changes Items only related fields will be updated by new price value. 
+For example if an item`s price changes Items only related fields will be updated by new price value. When new events gathered they will be appended to event related tables.
 
 ![picture alt](flow-diagram-ETL-design.jpg)
 
@@ -66,7 +66,7 @@ Below is the E-R diagram of data model and shown tables gathered into PowerBI De
 
 ![picture alt](flow-diagram-data-model.jpg)
 
-Data model imported into PBIX file
+Tables from Snowflake imported into PBIX file
 
 ![picture alt](PBI-model.png)
 
