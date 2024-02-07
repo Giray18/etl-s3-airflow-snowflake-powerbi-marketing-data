@@ -55,7 +55,7 @@ Below shown flow diagram demonstration of the solution will be implemented.
 **S3 Cloud Storage** : As mentioned 2 csv files located on a storage endpoint. No further actions will be taken for storage
 
 **Airflow ETL Design** : Below design shown on schema is used for ETL design. DAGS on airflow will get data from S3 location transform and load into database/schema in a daily scheduled manner. Trigger of DAGS will be done by themselves, which means first raw_data table DAG will run and trigger next DAG as a sequence, dims table DAGS will run first following each other at last fact table dag will run and ETL cycle will be completed.
-Below is screenshot reflects DAGs created
+Below is screenshot reflects DAGs created. DAGS can be found on REPO`s astro-sdk-tutorial/dags folder
 
 ![picture alt](dags-1.png)
 
